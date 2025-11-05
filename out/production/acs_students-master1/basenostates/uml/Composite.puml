@@ -1,0 +1,35 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+skinparam classAttributeIconSize 0
+
+
+class Space extends Area {
++addDoor(door : Door)
++getDoorsGivingAccess() : Door[]
++findAreaById(id : String) : Area
++getSpaces() : Area[]
+}
+
+
+abstract class Area {
+#name : String
++getDoorsGivingAccess() : Door[]
++findAreaById(id : String) : Area
++getSpaces() : Area[]
+}
+
+
+DirectoryAreas --> "1" Area : "rootArea"
+
+class Partition extends Area {
+-areas : Area[]
++addArea(area : Area)
++getDoorsGivingAccess() : Door[]
++findAreaById(id : String) : Area
++getSpaces() : Area[]
+
+}
+
+Partition"1"*-->"*"Area
+
+@enduml
