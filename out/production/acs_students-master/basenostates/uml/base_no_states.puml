@@ -1,0 +1,245 @@
+@startuml
+'https://plantuml.com/class-diagram
+skinparam classAttributeIconSize 0
+
+class WebServer {
+- {static} PORT :int
+- {static} FORMATTER : DateTimeFormatter
++ WebServer()
+}
+
+class SocketThread {
+- insocked : Socked
+- makeRequest(tokens : String[]) : Request
+- makeRequestReader(tokens : String[]) : RequestReader
+- makeRequestArea(tokens : String[]) : RequestArea
+- makeHeaderAnswer() : String
+- makeJsonAnswer(request : Request) : String
++ run()
+}
+
+WebServer +-right- SocketThread
+
+note right of SocketThread
+inner class
+of WebServer
+end note
+
+'class DirectoryDoors {
+'- {static} allDoors : Door[]
+'+ {static} makeDoors()
+'+ {static} findDoorById(id : String) : Door
+'+ {static} getAllDoors() : Door[]
+'}
+
+
+
+class DirectoryUserGroups {
+- {static} userGroups : UserGroup[]
++ {static} makeUserGroups()
++ {static} findUserByCredential(credential : String) : User
+}
+
+DirectoryUserGroups o--> "1" UserGroup : "usersGroups"
+
+class UserGroup {
+-name : String
+-actions : String[]
++findUserByCredential(credential : String) : User
++hasSpace(areaName : String) : boolean
++containsArea(spaces : Area[], area : Area) : boolean
++hasAction(action : String) : boolean
++isWithinSchedule(now : LocalDateTime) : boolean
++toString() : String
+}
+
+UserGroup"1"*-->"*" User : "users"
+UserGroup-->Area : "areas"
+UserGroup--> "1"Schedule : "schedule"
+
+class Door {
+- id : String
+- closed : boolean
++ Door(id : String)
++ processRequest(request : RequestReader)
++ setState(doorState : DoorState)
++ toJson() : JSONObject
++ toString() : String
+'+ isClosed() :boolean
+'+ setClosed(b : boolean)
+'+ getStateName() : String
+- doAction(action : String)
+}
+
+Door-up-> "1" Space :"fromSpace"
+Door-up-> "1" Space : "toSpace"
+Door-->DoorState
+
+abstract class DoorState{
+# door : Door
++DoorState(door : Door)
++ {abstract} lock()
++ {abstract} unlock()
++ {abstract} open()
++ {abstract} close()
++ {abstract} unlockShortly()
++String toString();
+}
+
+class Locked extends DoorState{
++Locked(door : Door)
++lock()
++unlock()
++open()
++close()
++unlockShortly()
++String toString();
+}
+
+class Unlocked extends DoorState{
++Unlocked(door : Door)
++lock()
++unlock()
++open()
++close()
++unlockShortly()
++String toString();
+}
+
+class Propped extends DoorState{
++Propped(door : Door)
++lock()
++unlock()
++open()
++close()
++unlockShortly()
++String toString();
+}
+
+class UnlockShortly extends DoorState{
+- final Clock clock
+- final LocalDateTime unlockStartTime
++UnlockShortly(door : Door)
++update(o: Observable, arg: Object)
++lock()
++unlock()
++open()
++close()
++unlockShortly()
++String toString();
+}
+UnlockShortly ..|> Observer
+
+class Observer
+
+class Clock extends Observable{
+- date: LocalDateTime
+- timer: Timer
+- period: int
+- isActive: boolean
+- instance: Clock
++ static Clock getInstance(int period)
++Clock(period: int, observer: Observer)
++ start(): void
++ stop(): void
++ isActive(): boolean
+}
+UnlockShortly --> Clock : observa
+Clock-->"1" Clock : instance
+
+class Space extends Area {
++addDoor(door : Door)
+'+getDoorsGivingAccess() : Door[]
+'+findAreaById(id : String) : Area
++getSpaces() : Area[]
++accept(visitor: Visitor)
+}
+
+Space--> "1..*" Door : "doors"
+
+abstract class Area {
+#name : String
+'+getDoorsGivingAccess() : Door[]
+'+findAreaById(id : String) : Area
++getSpaces() : Area[]
++accept(visitor: Visitor) {abstract}
+}
+
+class DirectoryAreas {
+-{static} rootArea : Area
+-{static} allDoors : Door[]
++{static} makeAreas()
++{static} findAreaById(id : String) : Area
++{static} findDoorById(id : String) : Door
++{static} getAllDoors() : Door[]
+}
+
+DirectoryAreas --> "1" Area : "rootArea"
+
+class Partition extends Area {
+-areas : Area[]
++addArea(area : Area)
+'+getDoorsGivingAccess() : Door[]
+'+findAreaById(id : String) : Area
++getSpaces() : Area[]
++accept(visitor: Visitor)
+}
+
+Partition"1"*-->"*"Area
+
+class Schedule {
+-fromDay : LocalDate
+-toDay : LocalDate
+-startTime : LocalTime
+-endTime : LocalTime
+-daysOfWeek : DayofWeek[]
++isWithinSchedule(now : LocalDateTime) : boolean
+}
+
+class User {
+- name : String
+- credential : String
++ User(name: String, credential: String)
++ toString() : String
+}
+interface Visitor{
++visitPartition(partition: Partition)
++visitSpace(space: Space)
+}
+
+class FindAreaByIdVisitor implements Visitor {
+- areaId: String
+- foundArea: Area
++ visitSpace(space: Space)
++ visitPartition(partition: Partition)
+}
+
+class GetDoorsGivingAccessVisitor implements Visitor{
+-doors: ArrayList<Door>
++visitSpace(space: Space)
++visitPartition(partition: Partition)
+}
+
+Partition --> Visitor
+Visitor-->Partition
+Visitor-->Space
+Space-->Visitor
+
+class Main {
++ {static} main(args : String)
+}
+
+note right of Main::main
+DirectoryDoors.makeDoors()
+DiretoryUsers.makeUsers()
+new Webserver()
+end note
+
+Main -[hidden]down- WebServer
+Space -[hidden]down- Area
+Partition -[hidden]down- Area
+
+
+'WebServer -[hidden]down- DirectoryDoors
+'DirectoryDoors -[hidden]right- DirectoryUsers
+@enduml
