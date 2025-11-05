@@ -1,0 +1,27 @@
+# JetBrains / IntelliJ
+.idea/
+*.iml
+
+# Java build outputs
+out/
+target/
+*.class
+
+# Gradle / Maven (si aplica)
+.gradle/
+build/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+
+# Logs y temporales
+*.log
+hs_err_pid*
+replay_pid*
+
+# SO / editor
+.DS_Store
+Thumbs.db
+.vscode/
